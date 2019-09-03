@@ -1,7 +1,7 @@
-require 'fastlane_core/configuration/config_item'
-require 'fastlane_core/device_manager'
-require 'credentials_manager/appfile_config'
-require_relative 'module'
+require "fastlane_core/configuration/config_item"
+require "fastlane_core/device_manager"
+require "credentials_manager/appfile_config"
+require_relative "module"
 
 module Snapshot
   class Options
@@ -55,7 +55,7 @@ module Snapshot
                                        value.each do |current|
                                          device = current.strip
                                          unless available.any? { |d| d.name.strip == device } || device == "Mac"
-                                           UI.user_error!("Device '#{device}' not in list of available simulators '#{available.join(', ')}'")
+                                           UI.user_error!("Device '#{device}' not in list of available simulators '#{available.join(", ")}'")
                                          end
                                        end
                                      end),
@@ -63,13 +63,13 @@ module Snapshot
                                      description: "A list of languages which should be used",
                                      short_option: "-g",
                                      type: Array,
-                                     default_value: ['en-US']),
+                                     default_value: ["en-US"]),
         FastlaneCore::ConfigItem.new(key: :launch_arguments,
-                                     env_name: 'SNAPSHOT_LAUNCH_ARGUMENTS',
+                                     env_name: "SNAPSHOT_LAUNCH_ARGUMENTS",
                                      description: "A list of launch arguments which should be used",
                                      short_option: "-m",
                                      type: Array,
-                                     default_value: ['']),
+                                     default_value: [""]),
         FastlaneCore::ConfigItem.new(key: :output_directory,
                                      short_option: "-o",
                                      env_name: "SNAPSHOT_OUTPUT_DIRECTORY",
@@ -87,37 +87,42 @@ module Snapshot
                                      short_option: "-i",
                                      optional: true),
         FastlaneCore::ConfigItem.new(key: :skip_open_summary,
-                                     env_name: 'SNAPSHOT_SKIP_OPEN_SUMMARY',
+                                     env_name: "SNAPSHOT_SKIP_OPEN_SUMMARY",
                                      description: "Don't open the HTML summary after running _snapshot_",
                                      default_value: false,
                                      is_string: false),
         FastlaneCore::ConfigItem.new(key: :skip_helper_version_check,
-                                     env_name: 'SNAPSHOT_SKIP_SKIP_HELPER_VERSION_CHECK',
+                                     env_name: "SNAPSHOT_SKIP_SKIP_HELPER_VERSION_CHECK",
                                      description: "Do not check for most recent SnapshotHelper code",
                                      default_value: false,
                                      is_string: false),
         FastlaneCore::ConfigItem.new(key: :clear_previous_screenshots,
-                                     env_name: 'SNAPSHOT_CLEAR_PREVIOUS_SCREENSHOTS',
+                                     env_name: "SNAPSHOT_CLEAR_PREVIOUS_SCREENSHOTS",
                                      description: "Enabling this option will automatically clear previously generated screenshots before running snapshot",
                                      default_value: false,
                                      is_string: false),
         FastlaneCore::ConfigItem.new(key: :reinstall_app,
-                                     env_name: 'SNAPSHOT_REINSTALL_APP',
+                                     env_name: "SNAPSHOT_REINSTALL_APP",
                                      description: "Enabling this option will automatically uninstall the application before running it",
                                      default_value: false,
                                      is_string: false),
         FastlaneCore::ConfigItem.new(key: :erase_simulator,
-                                     env_name: 'SNAPSHOT_ERASE_SIMULATOR',
+                                     env_name: "SNAPSHOT_ERASE_SIMULATOR",
                                      description: "Enabling this option will automatically erase the simulator before running the application",
                                      default_value: false,
                                      is_string: false),
         FastlaneCore::ConfigItem.new(key: :localize_simulator,
-                                     env_name: 'SNAPSHOT_LOCALIZE_SIMULATOR',
+                                     env_name: "SNAPSHOT_LOCALIZE_SIMULATOR",
                                      description: "Enabling this option will configure the Simulator's system language",
                                      default_value: false,
                                      is_string: false),
+        FastlaneCore::ConfigItem.new(key: :set_dark_mode_simulator,
+                                     env_name: "SET_DARK_MODE_SIMULATOR",
+                                     description: "Enabling this option will use dark mode",
+                                     default_value: false,
+                                     is_string: false),
         FastlaneCore::ConfigItem.new(key: :app_identifier,
-                                     env_name: 'SNAPSHOT_APP_IDENTIFIER',
+                                     env_name: "SNAPSHOT_APP_IDENTIFIER",
                                      short_option: "-a",
                                      optional: true,
                                      description: "The bundle identifier of the app to uninstall (only needed when enabling reinstall_app)",
@@ -126,13 +131,13 @@ module Snapshot
                                      default_value: ENV["SNAPSHOT_APP_IDENTITIFER"] || CredentialsManager::AppfileConfig.try_fetch_value(:app_identifier),
                                      default_value_dynamic: true),
         FastlaneCore::ConfigItem.new(key: :add_photos,
-                                     env_name: 'SNAPSHOT_PHOTOS',
+                                     env_name: "SNAPSHOT_PHOTOS",
                                      short_option: "-j",
                                      description: "A list of photos that should be added to the simulator before running the application",
                                      type: Array,
                                      optional: true),
         FastlaneCore::ConfigItem.new(key: :add_videos,
-                                     env_name: 'SNAPSHOT_VIDEOS',
+                                     env_name: "SNAPSHOT_VIDEOS",
                                      short_option: "-u",
                                      description: "A list of videos that should be added to the simulator before running the application",
                                      type: Array,
@@ -177,17 +182,17 @@ module Snapshot
                                      optional: true),
         FastlaneCore::ConfigItem.new(key: :scheme,
                                      short_option: "-s",
-                                     env_name: 'SNAPSHOT_SCHEME',
+                                     env_name: "SNAPSHOT_SCHEME",
                                      description: "The scheme you want to use, this must be the scheme for the UI Tests",
                                      optional: true), # optional true because we offer a picker to the user
         FastlaneCore::ConfigItem.new(key: :number_of_retries,
                                      short_option: "-n",
-                                     env_name: 'SNAPSHOT_NUMBER_OF_RETRIES',
+                                     env_name: "SNAPSHOT_NUMBER_OF_RETRIES",
                                      description: "The number of times a test can fail before snapshot should stop retrying",
                                      type: Integer,
                                      default_value: 1),
         FastlaneCore::ConfigItem.new(key: :stop_after_first_error,
-                                     env_name: 'SNAPSHOT_BREAK_ON_FIRST_ERROR',
+                                     env_name: "SNAPSHOT_BREAK_ON_FIRST_ERROR",
                                      description: "Should snapshot stop immediately after the tests completely failed on one device?",
                                      default_value: false,
                                      is_string: false),
@@ -216,7 +221,7 @@ module Snapshot
                                      env_name: "SNAPSHOT_EXECUTE_CONCURRENT_SIMULATORS",
                                      description: "Take snapshots on multiple simulators concurrently. Note: This option is only applicable when running against Xcode 9",
                                      default_value: true,
-                                     is_string: false)
+                                     is_string: false),
       ]
     end
   end

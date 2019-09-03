@@ -1,10 +1,10 @@
-require 'plist'
+require "plist"
 
-require_relative '../module'
-require_relative '../test_command_generator'
-require_relative '../collector'
-require_relative '../fixes/hardware_keyboard_fix'
-require_relative '../fixes/simulator_zoom_fix'
+require_relative "../module"
+require_relative "../test_command_generator"
+require_relative "../collector"
+require_relative "../fixes/hardware_keyboard_fix"
+require_relative "../fixes/simulator_zoom_fix"
 
 module Snapshot
   class SimulatorLauncherBase
@@ -64,6 +64,9 @@ module Snapshot
           # no need to reinstall if device has been erased
           uninstall_app(type)
         end
+        if launcher_config.set_dark_mode_simulator
+          set_dark_mode_simulator(type, true)
+        end
       end
     end
 
@@ -87,7 +90,7 @@ module Snapshot
           # Run legacy addphoto and addvideo if addmedia isn't found
           # Output will be empty strin gif it was a success
           # Output will contain "usage: simctl" if command not found
-          if output.include?('usage: simctl')
+          if output.include?("usage: simctl")
             Helper.backticks("xcrun simctl add#{media_type} #{device_udid} #{path.shellescape} &> /dev/null")
           end
         end
@@ -116,12 +119,19 @@ module Snapshot
         locale ||= language.sub("-", "_")
         plist = {
           AppleLocale: locale,
-          AppleLanguages: [language]
+          AppleLanguages: [language],
         }
         UI.message("Localizing #{device_type} (AppleLocale=#{locale} AppleLanguages=[#{language}])")
-        plist_path = "#{ENV['HOME']}/Library/Developer/CoreSimulator/Devices/#{device_udid}/data/Library/Preferences/.GlobalPreferences.plist"
+        plist_path = "#{ENV["HOME"]}/Library/Developer/CoreSimulator/Devices/#{device_udid}/data/Library/Preferences/.GlobalPreferences.plist"
         File.write(plist_path, Plist::Emit.dump(plist))
       end
+    end
+
+    def set_dark_mode_simulator(device_type, dark_mode_on)
+      device_udid = TestCommandGenerator.device_udid(device_type)
+      UI.message("Change value of Apparence to 1 for #{device_type}")
+      plist_path = "#{ENV["HOME"]}/Library/Developer/CoreSimulator/Devices/#{device_udid}/data/Library/Preferences/com.apple.uikitservices.userInterfaceStyleMode.plist"
+      `plutil -replace "UserInterfaceStyleMode" -integer 1 #{device_udid}`
     end
 
     def copy_simulator_logs(device_names, language, locale, launch_arguments)
